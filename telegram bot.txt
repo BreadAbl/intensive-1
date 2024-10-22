@@ -1,0 +1,62 @@
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup 
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes 
+ 
+# Ваш токен API бота 
+TOKEN = '7395426377:AAFa8pvB70dhvTmWvaAc3bysyqCzUA3w-ro' 
+ 
+# Колбэк-функция для команды /start 
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None: 
+    # Отправляем приветственное сообщение с кнопками курсов 
+    keyboard = [ 
+        [InlineKeyboardButton("1", callback_data='course_1'), 
+         InlineKeyboardButton("2", callback_data='course_2')], 
+        [InlineKeyboardButton("3", callback_data='course_3'), 
+         InlineKeyboardButton("4", callback_data='course_4')] 
+    ] 
+ 
+    reply_markup = InlineKeyboardMarkup(keyboard) 
+ 
+    await update.message.reply_text( 
+        'Здравствуйте, это бот FizBook. Выберите какой у вас курс:', reply_markup=reply_markup 
+    ) 
+ 
+# Колбэк-функция для обработки нажатий на кнопки 
+async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None: 
+    query = update.callback_query 
+    await query.answer() 
+ 
+    # Если пользователь выбрал курс, отображаем специальности 
+    if query.data.startswith('course_'): 
+        keyboard = [ 
+            [InlineKeyboardButton("ИСП", callback_data='spec_isp'), 
+             InlineKeyboardButton("АДМ", callback_data='spec_adm')], 
+            [InlineKeyboardButton("АТ", callback_data='spec_at'), 
+             InlineKeyboardButton("МЦ", callback_data='spec_mc')], 
+            [InlineKeyboardButton("ЭБАС", callback_data='spec_ebas'), 
+             InlineKeyboardButton("НКС", callback_data='spec_nks')], 
+            [InlineKeyboardButton("ОТП", callback_data='spec_otp')] 
+        ] 
+ 
+        reply_markup = InlineKeyboardMarkup(keyboard) 
+        await query.edit_message_text(text="Выберите вашу специальность:", reply_markup=reply_markup) 
+ 
+    # Если пользователь выбрал специальность, отправляем ссылку на учебник 
+    if query.data.startswith('spec_'): 
+        # Здесь добавьте логику для определения правильной ссылки на учебник. 
+        # Для примера используется одна и та же ссылка. 
+        book_link = 'https://disk.yandex.ru/i/71brgonG6xS-ZA' 
+        await query.edit_message_text(text=f"Ссылка на учебник: {book_link}") 
+ 
+def main() -> None: 
+    # Создаем приложение 
+    application = Application.builder().token(TOKEN).build() 
+ 
+    # Регистрация обработчиков команд 
+    application.add_handler(CommandHandler('start', start)) 
+    application.add_handler(CallbackQueryHandler(button)) 
+ 
+    # Запуск бота 
+    application.run_polling() 
+ 
+if __name__ == '__main__': 
+    main()
